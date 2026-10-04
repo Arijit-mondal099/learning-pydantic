@@ -1,10 +1,13 @@
-from pydantic import BaseModel, field_validator, model_validator, computed_field
-from typing import List
+from pydantic import BaseModel, Field, field_validator, model_validator, computed_field
+from typing import List, Annotated
 
 class User(BaseModel):
-    username: str
-    password: str
-    confirm_password: str
+    username: Annotated[str, Field(..., title="Username", description="The username of the user", examples=["arijit", "babai"])]
+    password: Annotated[str, Field(..., min_length=8, max_length=16)]
+    confirm_password: Annotated[str, Field(..., min_length=8, max_length=16)]
+    
+    # validation -> type coercion -> after (default)
+    # validation -> before -> type coercion
     
     @field_validator("username")
     def validate_username(cls, value):
@@ -20,12 +23,12 @@ class User(BaseModel):
     
 class Product(BaseModel):
     id: int
-    name: str
-    price: float
-    quantity: int
+    name: Annotated[str, Field(..., min_length=4, max_length=16)]
+    price: Annotated[float, Field(..., gt=0)]
+    quantity: Annotated[int, Field(..., gt=0)]
 
 class Cart(BaseModel):
-    products: List[Product]
+    products: Annotated[List[Product], Field(..., max_length=5)]
     
     @computed_field
     @property
